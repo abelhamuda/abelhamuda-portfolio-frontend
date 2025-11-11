@@ -64,6 +64,26 @@ export const api = {
       }
     }),
 
+  // Image Upload
+  uploadImage: async (file, token) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch(`${API_BASE}/admin/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  },
+
   // Projects API - dengan safe handling
   getProjects: async () => {
     try {

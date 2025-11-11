@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { api } from '../utils/api'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 
 const ArticleDetail = () => {
   const { slug } = useParams()
@@ -12,8 +13,13 @@ const ArticleDetail = () => {
 
   useEffect(() => {
     loadArticle()
-    loadRelatedArticles()
   }, [slug])
+
+  useEffect(() => {
+    if (article) {
+      loadRelatedArticles()
+    }
+  }, [article])
 
   const loadArticle = async () => {
     try {
@@ -30,7 +36,6 @@ const ArticleDetail = () => {
   const loadRelatedArticles = async () => {
     try {
       const allArticles = await api.getArticles()
-      // Filter articles dengan category yang sama (exclude current article)
       const related = allArticles
         .filter(a => a.slug !== slug && a.category === article?.category)
         .slice(0, 3)
@@ -94,9 +99,16 @@ const ArticleDetail = () => {
           className="mb-8"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="font-mono text-sm px-3 py-1 border border-neon-green text-neon-green rounded-full">
-              {article.category || 'Uncategorized'}
-            </span>
+            <div className="flex items-center space-x-3">
+              <span className="font-mono text-sm px-3 py-1 border border-neon-green text-neon-green rounded-full">
+                {article.category || 'Uncategorized'}
+              </span>
+              {article.content_type === 'markdown' && (
+                <span className="font-mono text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded">
+                  Markdown
+                </span>
+              )}
+            </div>
             <time className="font-mono text-sm text-gray-400">
               {formatDate(article.created_at)}
             </time>
@@ -128,21 +140,20 @@ const ArticleDetail = () => {
           transition={{ delay: 0.3, duration: 0.8 }}
           className="dashboard-panel p-8 rounded-lg mb-12"
         >
-          <div 
-            className="prose prose-invert max-w-none"
-            style={{
-              color: '#e5e7eb',
-              fontFamily: 'Inter, sans-serif',
-              lineHeight: '1.8'
-            }}
-          >
-            {/* Convert plain text to paragraphs */}
-            {article.content.split('\n\n').map((paragraph, index) => (
-              <p key={index} className="mb-6 text-gray-300 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          {article.content_type === 'markdown' ? (
+            <MarkdownRenderer content={article.content} />
+          ) : (
+            // Fallback for HTML content or plain text
+            <div 
+              className="prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+              style={{
+                color: '#e5e7eb',
+                fontFamily: 'Inter, sans-serif',
+                lineHeight: '1.8'
+              }}
+            />
+          )}
 
           {/* Article Metadata */}
           <div className="mt-8 pt-6 border-t border-gray-700">

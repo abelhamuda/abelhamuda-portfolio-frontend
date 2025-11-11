@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { api } from '../utils/api'
 import { motion } from 'framer-motion'
 import Chart from 'react-apexcharts'
+import RichTextEditor from '../components/RichTextEditor'
 
 const Dashboard = () => {
   const { isAuthenticated, token } = useAuth()
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    content_type: 'markdown',
     category: '',
     tags: ''
   })
@@ -96,7 +98,13 @@ const Dashboard = () => {
       }
       setShowForm(false)
       setEditingArticle(null)
-      setFormData({ title: '', content: '', category: '', tags: '' })
+      setFormData({ 
+        title: '', 
+        content: '', 
+        content_type: 'markdown',
+        category: '', 
+        tags: '' 
+      })
       loadArticles()
     } catch (error) {
       console.error('Error saving article:', error)
@@ -109,6 +117,7 @@ const Dashboard = () => {
     setFormData({
       title: article.title,
       content: article.content,
+      content_type: article.content_type || 'markdown',
       category: article.category,
       tags: article.tags
     })
@@ -321,14 +330,19 @@ const Dashboard = () => {
                   className="w-full p-2 bg-black border border-neon-green text-white font-mono"
                   required
                 />
-                <textarea
-                  placeholder="Content"
-                  value={formData.content}
-                  onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  rows="6"
-                  className="w-full p-2 bg-black border border-neon-green text-white font-mono"
-                  required
-                />
+                
+                {/* Rich Text Editor */}
+                <div>
+                  <label className="font-mono text-neon-green text-sm mb-2 block">
+                    Content (Markdown)
+                  </label>
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={(value) => setFormData({...formData, content: value || ''})}
+                    token={token}
+                  />
+                </div>
+
                 <input
                   type="text"
                   placeholder="Category"
@@ -343,6 +357,22 @@ const Dashboard = () => {
                   onChange={(e) => setFormData({...formData, tags: e.target.value})}
                   className="w-full p-2 bg-black border border-neon-green text-white font-mono"
                 />
+                
+                {/* Content Type Selector */}
+                <div>
+                  <label className="font-mono text-neon-green text-sm mb-2 block">
+                    Content Type
+                  </label>
+                  <select
+                    value={formData.content_type}
+                    onChange={(e) => setFormData({...formData, content_type: e.target.value})}
+                    className="w-full p-2 bg-black border border-neon-green text-white font-mono"
+                  >
+                    <option value="markdown">Markdown</option>
+                    <option value="html">HTML</option>
+                  </select>
+                </div>
+
                 <div className="flex space-x-4">
                   <button
                     type="submit"
@@ -355,7 +385,13 @@ const Dashboard = () => {
                     onClick={() => {
                       setShowForm(false)
                       setEditingArticle(null)
-                      setFormData({ title: '', content: '', category: '', tags: '' })
+                      setFormData({ 
+                        title: '', 
+                        content: '', 
+                        content_type: 'markdown',
+                        category: '', 
+                        tags: '' 
+                      })
                     }}
                     className="font-mono px-4 py-2 border border-neon-red text-neon-red hover:neon-glow"
                   >
@@ -376,11 +412,22 @@ const Dashboard = () => {
               articles.map((article) => (
                 <div key={article.id} className="border border-gray-700 p-4 rounded-lg hover:border-neon-green transition-colors">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-mono text-neon-green text-lg">{article.title}</h4>
-                      <p className="text-gray-300 text-sm mt-1">{article.category} • {new Date(article.created_at).toLocaleDateString()}</p>
+                    <div className="flex-1">
+                      <h4 className="font-mono text-neon-green text-lg mb-2">{article.title}</h4>
+                      <div className="flex items-center space-x-4 text-sm text-gray-300 mb-2">
+                        <span>{article.category}</span>
+                        <span>•</span>
+                        <span className="font-mono text-xs px-2 py-1 bg-gray-800 rounded">
+                          {article.content_type || 'markdown'}
+                        </span>
+                        <span>•</span>
+                        <span>{new Date(article.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm line-clamp-2">
+                        {article.content.substring(0, 150)}...
+                      </p>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 ml-4">
                       <button
                         onClick={() => handleEditArticle(article)}
                         className="font-mono text-xs px-3 py-1 border border-neon-green text-neon-green hover:neon-glow"
