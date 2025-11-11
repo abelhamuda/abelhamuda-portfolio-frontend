@@ -11,16 +11,16 @@ const About = () => {
     "> cat about_me.txt",
     " ",
     "Name: Abel Hamuda",
-    "Title: Full-Stack Developer",
-    "Specialization: React.js, Go, AI/ML",
+    "Title: Full-Stack Developer or a Vibe Coder?",
+    "Specialization: React.js, Go, AI/ML, Laravel",
     " ",
     "Bio:",
     "Passionate developer with expertise in modern web technologies.",
     "Love building scalable applications and exploring AI frontiers.",
     "Always learning, always coding.",
     " ",
-    "Skills: React, Go, Node.js, Python, MySQL, TailwindCSS",
-    "Interests: AI, Open Source, Neurotechnology",
+    "Skills: React, Go, Laravel, Python, MySQL, TailwindCSS",
+    "Interests: AI, Open Source, WEB3, CyberSecurity",
     " ",
     "> _"
   ]
@@ -49,9 +49,9 @@ const About = () => {
   }
 
   const skills = [
-    { name: 'React.js', level: 90 },
-    { name: 'Go', level: 85 },
-    { name: 'Node.js', level: 80 },
+    { name: 'React', level: 85 },
+    { name: 'Go', level: 70 },
+    { name: 'Laravel', level: 90 },
     { name: 'Python', level: 75 },
     { name: 'MySQL', level: 85 },
     { name: 'TailwindCSS', level: 90 }
