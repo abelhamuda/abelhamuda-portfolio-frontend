@@ -56,7 +56,7 @@ const Login = () => {
               value={credentials.email}
               onChange={(e) => setCredentials({...credentials, email: e.target.value})}
               className="w-full p-3 bg-black border border-neon-green text-white font-mono focus:outline-none focus:neon-glow"
-              placeholder="admin@abelhamuda.com"
+              placeholder="guessit@abelhamuda.com"
               required
             />
           </div>
@@ -90,7 +90,7 @@ const Login = () => {
 
         <div className="mt-6 text-center">
           <div className="font-mono text-gray-400 text-xs">
-            Default credentials: admin@abelhamuda.com / admin123
+            Oh you get here. Try me then!
           </div>
         </div>
       </motion.div>

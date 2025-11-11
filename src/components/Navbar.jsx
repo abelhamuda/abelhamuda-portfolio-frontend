@@ -42,7 +42,7 @@ const Navbar = () => {
             ))}
             
             {/* Dashboard Link */}
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <>
                 <Link
                   to="/dashboard"
@@ -57,13 +57,6 @@ const Navbar = () => {
                   Logout
                 </button>
               </>
-            ) : (
-              <Link
-                to="/login"
-                className="font-mono text-sm text-neon-green hover:neon-glow px-4 py-2 border border-neon-green rounded"
-              >
-                Login
-              </Link>
             )}
           </div>
 

@@ -138,23 +138,17 @@ const About = () => {
           <div className="space-y-6">
             {[
               {
-                year: '2023 - Present',
-                role: 'Senior Full-Stack Developer',
-                company: 'Neurodex AI',
-                description: 'Leading development of AI-powered web applications using React and Go'
+                year: '2025',
+                role: 'Product Management Intern',
+                company: 'Staffinc',
+                description: 'Owning a product development project to perform new features'
               },
               {
-                year: '2021 - 2023',
-                role: 'Full-Stack Developer',
-                company: 'Tech Innovations Inc',
-                description: 'Built scalable web applications and REST APIs for various clients'
+                year: '2024 - 2025',
+                role: 'IT Security Intern',
+                company: 'PT Bank Neo Commerce',
+                description: 'Perform a security related monitoring and audit'
               },
-              {
-                year: '2020 - 2021',
-                role: 'Frontend Developer',
-                company: 'Digital Solutions Co',
-                description: 'Developed responsive web interfaces and implemented modern UI/UX designs'
-              }
             ].map((exp, index) => (
               <motion.div
                 key={index}
