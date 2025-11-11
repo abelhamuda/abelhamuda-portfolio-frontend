@@ -21,6 +21,49 @@ const Articles = () => {
     }
   }
 
+  // Function to clean markdown for preview
+  const cleanMarkdownPreview = (content, maxLength = 150) => {
+    if (!content) return ''
+    
+    // Remove markdown syntax
+    let cleanText = content
+      // Remove headers
+      .replace(/^#+\s+/gm, '')
+      // Remove bold and italic
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      // Remove code blocks
+      .replace(/```[\s\S]*?```/g, '[code]')
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove images
+      .replace(/!\[.*?\]\(.*?\)/g, '[image]')
+      // Remove links but keep text
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      // Remove blockquotes
+      .replace(/^>\s+/gm, '')
+      // Remove horizontal rules
+      .replace(/^---$/gm, '')
+      // Remove extra whitespace
+      .replace(/\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    // Truncate to max length
+    if (cleanText.length > maxLength) {
+      cleanText = cleanText.substring(0, maxLength) + '...'
+    }
+
+    return cleanText
+  }
+
+  // Function to get reading time
+  const getReadingTime = (content) => {
+    const wordsPerMinute = 200
+    const wordCount = content.split(/\s+/).length
+    const readingTime = Math.ceil(wordCount / wordsPerMinute)
+    return readingTime
+  }
+
   const categories = ['all', ...new Set(articles.map(article => article.category).filter(Boolean))]
 
   const filteredArticles = articles.filter(article => {
@@ -98,14 +141,21 @@ const Articles = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
               whileHover={{ y: -5, transition: { duration: 0.3 } }}
-              className="dashboard-panel rounded-lg overflow-hidden group cursor-pointer h-full flex flex-col"
+              className="dashboard-panel rounded-lg overflow-hidden group cursor-pointer h-full flex flex-col border border-gray-700 hover:border-neon-green transition-all duration-300"
             >
               {/* Article Header */}
               <div className="p-6 flex-1">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="font-mono text-xs px-3 py-1 border border-neon-green text-neon-green rounded-full">
-                    {article.category || 'Uncategorized'}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-xs px-3 py-1 border border-neon-green text-neon-green rounded-full">
+                      {article.category || 'Uncategorized'}
+                    </span>
+                    {article.content_type === 'markdown' && (
+                      <span className="font-mono text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded">
+                        MD
+                      </span>
+                    )}
+                  </div>
                   <time className="font-mono text-xs text-gray-400">
                     {formatDate(article.created_at)}
                   </time>
@@ -115,14 +165,25 @@ const Articles = () => {
                   {article.title}
                 </h2>
 
-                <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                  {article.content.substring(0, 150)}...
+                {/* Clean Preview Text */}
+                <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
+                  {cleanMarkdownPreview(article.content)}
                 </p>
+
+                {/* Article Metadata */}
+                <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <span>📖 {getReadingTime(article.content)} min read</span>
+                  </div>
+                  <span className="font-mono">
+                    {article.content_type === 'markdown' ? 'Markdown' : 'HTML'}
+                  </span>
+                </div>
 
                 {/* Tags */}
                 {article.tags && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {article.tags.split(',').map(tag => (
+                  <div className="flex flex-wrap gap-2">
+                    {article.tags.split(',').slice(0, 3).map(tag => (
                       <span
                         key={tag}
                         className="font-mono text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded"
@@ -130,17 +191,22 @@ const Articles = () => {
                         #{tag.trim()}
                       </span>
                     ))}
+                    {article.tags.split(',').length > 3 && (
+                      <span className="font-mono text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded">
+                        +{article.tags.split(',').length - 3}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
 
               {/* Read More Button */}
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-0 mt-auto">
                 <Link
                   to={`/articles/${article.slug}`}
-                  className="font-mono text-sm px-4 py-2 border border-neon-green text-neon-green hover:neon-glow transition-all duration-300 inline-block w-full text-center"
+                  className="font-mono text-sm px-4 py-2 border border-neon-green text-neon-green hover:neon-glow transition-all duration-300 inline-block w-full text-center group-hover:bg-neon-green group-hover:text-black"
                 >
-                  Read More →
+                  Read Article →
                 </Link>
               </div>
             </motion.article>

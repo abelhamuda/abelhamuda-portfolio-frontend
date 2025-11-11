@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8080/api'
+const API_BASE = 'https://api.abelhamuda.my.id/api'
 
 // Helper function untuk handle fetch dengan error handling
 const fetchWithErrorHandling = async (url, options = {}) => {

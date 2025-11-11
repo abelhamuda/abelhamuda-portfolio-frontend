@@ -21,6 +21,39 @@ const ArticleDetail = () => {
     }
   }, [article])
 
+  // Function to clean markdown for preview (same as in Articles.jsx)
+  const cleanMarkdownPreview = (content, maxLength = 100) => {
+    if (!content) return ''
+    
+    let cleanText = content
+      .replace(/^#+\s+/gm, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/```[\s\S]*?```/g, '[code]')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/!\[.*?\]\(.*?\)/g, '[image]')
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      .replace(/^>\s+/gm, '')
+      .replace(/^---$/gm, '')
+      .replace(/\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    if (cleanText.length > maxLength) {
+      cleanText = cleanText.substring(0, maxLength) + '...'
+    }
+
+    return cleanText
+  }
+
+  // Function to get reading time
+  const getReadingTime = (content) => {
+    const wordsPerMinute = 200
+    const wordCount = content.split(/\s+/).length
+    const readingTime = Math.ceil(wordCount / wordsPerMinute)
+    return readingTime
+  }
+
   const loadArticle = async () => {
     try {
       const data = await api.getArticleBySlug(slug)
@@ -85,9 +118,10 @@ const ArticleDetail = () => {
         >
           <Link 
             to="/articles" 
-            className="font-mono text-neon-green hover:neon-glow transition-all duration-300"
+            className="font-mono text-neon-green hover:neon-glow transition-all duration-300 inline-flex items-center space-x-2"
           >
-            ← Back to Articles
+            <span>←</span>
+            <span>Back to Articles</span>
           </Link>
         </motion.div>
 
@@ -98,7 +132,7 @@ const ArticleDetail = () => {
           transition={{ duration: 0.8 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center space-x-3">
               <span className="font-mono text-sm px-3 py-1 border border-neon-green text-neon-green rounded-full">
                 {article.category || 'Uncategorized'}
@@ -109,9 +143,13 @@ const ArticleDetail = () => {
                 </span>
               )}
             </div>
-            <time className="font-mono text-sm text-gray-400">
-              {formatDate(article.created_at)}
-            </time>
+            <div className="flex items-center space-x-4 text-sm text-gray-400">
+              <time className="font-mono">
+                {formatDate(article.created_at)}
+              </time>
+              <span className="font-mono">•</span>
+              <span className="font-mono">📖 {getReadingTime(article.content)} min read</span>
+            </div>
           </div>
           
           <h1 className="font-mono text-3xl md:text-5xl text-neon-green mb-6 leading-tight">
@@ -124,7 +162,7 @@ const ArticleDetail = () => {
               {article.tags.split(',').map(tag => (
                 <span
                   key={tag}
-                  className="font-mono text-xs px-3 py-1 bg-gray-800 text-gray-300 rounded-full"
+                  className="font-mono text-xs px-3 py-1 bg-gray-800 text-gray-300 rounded-full hover:bg-gray-700 transition-colors"
                 >
                   #{tag.trim()}
                 </span>
@@ -138,12 +176,11 @@ const ArticleDetail = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
-          className="dashboard-panel p-8 rounded-lg mb-12"
+          className="dashboard-panel p-6 md:p-8 rounded-lg mb-12"
         >
           {article.content_type === 'markdown' ? (
             <MarkdownRenderer content={article.content} />
           ) : (
-            // Fallback for HTML content or plain text
             <div 
               className="prose prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: article.content }}
@@ -155,15 +192,15 @@ const ArticleDetail = () => {
             />
           )}
 
-          {/* Article Metadata */}
+          {/* Article Metadata Footer */}
           <div className="mt-8 pt-6 border-t border-gray-700">
-            <div className="flex flex-wrap items-center justify-between text-sm text-gray-400">
-              <div>
-                Published: {formatDate(article.created_at)}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-400 space-y-2 sm:space-y-0">
+              <div className="font-mono">
+                📅 Published: {formatDate(article.created_at)}
               </div>
               {article.updated_at !== article.created_at && (
-                <div>
-                  Updated: {formatDate(article.updated_at)}
+                <div className="font-mono">
+                  ✏️ Updated: {formatDate(article.updated_at)}
                 </div>
               )}
             </div>
@@ -186,18 +223,31 @@ const ArticleDetail = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
-                  className="dashboard-panel p-6 rounded-lg hover:neon-glow transition-all duration-300 cursor-pointer"
+                  className="dashboard-panel p-6 rounded-lg hover:border-neon-green border border-gray-700 transition-all duration-300 cursor-pointer group"
                   onClick={() => navigate(`/articles/${relatedArticle.slug}`)}
                 >
-                  <h3 className="font-mono text-neon-green text-lg mb-2 line-clamp-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-xs px-2 py-1 border border-neon-green text-neon-green rounded-full">
+                      {relatedArticle.category}
+                    </span>
+                    <span className="font-mono text-xs text-gray-400">
+                      {getReadingTime(relatedArticle.content)} min
+                    </span>
+                  </div>
+
+                  <h3 className="font-mono text-neon-green text-lg mb-3 line-clamp-2 group-hover:neon-glow transition-all duration-300">
                     {relatedArticle.title}
                   </h3>
-                  <p className="text-gray-300 text-sm line-clamp-2 mb-3">
-                    {relatedArticle.content.substring(0, 100)}...
+                  
+                  <p className="text-gray-300 text-sm mb-4 line-clamp-3 leading-relaxed">
+                    {cleanMarkdownPreview(relatedArticle.content, 120)}
                   </p>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-neon-green">{relatedArticle.category}</span>
-                    <span className="text-gray-400">{formatDate(relatedArticle.created_at)}</span>
+
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <span>{formatDate(relatedArticle.created_at)}</span>
+                    <span className="font-mono text-neon-green group-hover:neon-glow transition-all duration-300">
+                      Read →
+                    </span>
                   </div>
                 </motion.div>
               ))}
@@ -210,21 +260,53 @@ const ArticleDetail = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9, duration: 0.8 }}
-          className="flex justify-between items-center pt-8 border-t border-gray-800"
+          className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-800"
         >
           <Link
             to="/articles"
-            className="font-mono px-6 py-3 border border-neon-green text-neon-green hover:neon-glow transition-all duration-300"
+            className="font-mono px-6 py-3 border border-neon-green text-neon-green hover:neon-glow transition-all duration-300 text-center w-full sm:w-auto"
           >
             ← All Articles
           </Link>
           
-          <Link
-            to="/contact"
-            className="font-mono px-6 py-3 border border-neon-red text-neon-red hover:neon-glow transition-all duration-300"
-          >
-            Get In Touch →
-          </Link>
+          <div className="flex gap-4 w-full sm:w-auto">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="font-mono px-6 py-3 border border-gray-600 text-gray-400 hover:border-neon-green hover:text-neon-green transition-all duration-300 text-center flex-1 sm:flex-none"
+            >
+              ↑ Top
+            </button>
+            <Link
+              to="/contact"
+              className="font-mono px-6 py-3 border border-neon-red text-neon-red hover:neon-glow transition-all duration-300 text-center flex-1 sm:flex-none"
+            >
+              Contact →
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Share Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.8 }}
+          className="mt-8 pt-8 border-t border-gray-800 text-center"
+        >
+          <p className="font-mono text-gray-400 text-sm mb-4">
+            Enjoyed this article? Share it with others!
+          </p>
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url);
+                alert('Link copied to clipboard!');
+              }}
+              className="font-mono text-xs px-4 py-2 border border-neon-green text-neon-green hover:neon-glow transition-all duration-300"
+            >
+              Copy Link
+            </button>
+          </div>
         </motion.div>
       </div>
     </div>
